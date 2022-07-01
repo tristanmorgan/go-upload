@@ -51,12 +51,14 @@ func main() {
 	}
 
 	ctx := context.Background()
-
+	cfg := aws.NewConfig()
+	endpoint := os.Getenv("AWS_S3_ENDPOINT")
+	if len(endpoint) > 0 {
+		cfg.Endpoint = aws.String(endpoint)
+		cfg.S3ForcePathStyle = aws.Bool(true)
+	}
 	s3session := session.Must(session.NewSession(
-		&aws.Config{
-			Endpoint:         aws.String(os.Getenv("AWS_S3_ENDPOINT")),
-			S3ForcePathStyle: aws.Bool(true),
-		},
+		cfg,
 	))
 
 	uploader := s3manager.NewUploader(s3session)
