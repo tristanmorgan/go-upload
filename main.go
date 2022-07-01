@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -17,31 +16,31 @@ import (
 // Version number constant.
 const Version = "0.0.1"
 
-var (
-	sourcefile = flag.String("file", "", "File to upload")
-	destfile   = flag.String("dest", "", "Destination to upload")
-	versDisp   = flag.Bool("version", false, "Display version")
-	pathExp    = regexp.MustCompile(`s3:\/\/(?P<bucket>\w+)\/(?P<key>.+)`)
-)
+var pathExp = regexp.MustCompile(`s3:\/\/(?P<bucket>\w+)\/(?P<key>.+)`)
 
 func main() {
-	flag.Parse()
-
-	if *versDisp {
+	numArgs := len(os.Args[1:])
+	if numArgs >= 1 && os.Args[1] == "-v" {
 		fmt.Printf("Version: v%s %s\n", Version, runtime.Version())
 		os.Exit(0)
 	}
+	if numArgs != 2 {
+		fmt.Printf("Usage: %s [-v] source-file s3://bucket/key/path\n", os.Args[0])
+		os.Exit(0)
+	}
+	sourcefile := os.Args[1]
+	destfile := os.Args[2]
 
-	_, err := os.Stat(*sourcefile)
+	_, err := os.Stat(sourcefile)
 	if err != nil {
 		log.Panic("Couldn't stat file: " + err.Error())
 	}
-	f, err := os.Open(*sourcefile)
+	f, err := os.Open(sourcefile)
 	if err != nil {
 		log.Panic("" + err.Error())
 	}
 
-	match := pathExp.FindStringSubmatch(*destfile)
+	match := pathExp.FindStringSubmatch(destfile)
 	results := make(map[string]string)
 	for i, name := range match {
 		results[pathExp.SubexpNames()[i]] = name

@@ -3,13 +3,7 @@ A small upload tool, allows simple cross platform uploads to S3 compatible stora
 
 ## Usage
 
-    Usage of go-upload:
-      -dest string
-        Destination to upload
-      -file string
-        File to upload
-      -version
-        Display version
+    Usage: ./go-upload_darwin [-v] source-file s3://bucket/key/path
 
 ## License
 
