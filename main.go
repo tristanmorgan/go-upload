@@ -8,13 +8,14 @@ import (
 	"regexp"
 	"runtime"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
 // Version number constant.
-const Version = "0.0.1"
+const Version = "0.0.2"
 
 var pathExp = regexp.MustCompile(`s3:\/\/(?P<bucket>\w+)\/(?P<key>.+)`)
 
@@ -51,19 +52,15 @@ func main() {
 	}
 
 	ctx := context.Background()
-	cfg := aws.NewConfig()
-	endpoint := os.Getenv("AWS_S3_ENDPOINT")
-	if len(endpoint) > 0 {
-		cfg.Endpoint = aws.String(endpoint)
-		cfg.S3ForcePathStyle = aws.Bool(true)
+	cfg, err := config.LoadDefaultConfig(ctx)
+	if err != nil {
+		log.Printf("error: %v", err)
+		return
 	}
-	s3session := session.Must(session.NewSession(
-		cfg,
-	))
+	client := s3.NewFromConfig(cfg)
 
-	uploader := s3manager.NewUploader(s3session)
-
-	result, err := uploader.UploadWithContext(ctx, &s3manager.UploadInput{
+	uploader := manager.NewUploader(client)
+	result, err := uploader.Upload(ctx, &s3.PutObjectInput{
 		Bucket: aws.String(results["bucket"]),
 		Key:    aws.String(results["key"]),
 		Body:   f,
