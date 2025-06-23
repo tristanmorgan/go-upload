@@ -32,13 +32,15 @@ func main() {
 	sourcefile := os.Args[1]
 	destfile := os.Args[2]
 
-	_, err := os.Stat(sourcefile)
+	info, err := os.Stat(sourcefile)
 	if err != nil {
 		log.Panic("Couldn't stat file: " + err.Error())
+	} else if info.IsDir() {
+		log.Panic("Source is not a file.")
 	}
 	f, err := os.Open(sourcefile)
 	if err != nil {
-		log.Panic("" + err.Error())
+		log.Panic(err.Error())
 	}
 
 	match := pathExp.FindStringSubmatch(destfile)
